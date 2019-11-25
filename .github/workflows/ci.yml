@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull sources
+        uses: actions/checkout@v1
+
+      - name: Configure Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install CPT
+        run: pip install conan_package_tools
+
+      - name: Enable uploads
+        if: github.event.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags/')
+        run: echo "::set-env name=CONAN_LOGIN_USERNAME::grisumbras"
+
+      - name: Run CPT
+        run: python build.py
+        env:
+          CONAN_STABLE_BRANCH_PATTERN: '---'
+          CONAN_REFERENCE: libsass/3.6.3@grisumbras/testing
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
+          CONAN_UPLOAD: https://api.bintray.com/conan/grisumbras/conan
+          CONAN_GCC_VERSIONS: '7'
+          CONAN_ARCHS: x86_64
+          CONAN_BUILD_TYPES: Release
+
+  publish:
+    runs-on: ubuntu-latest
+
+    needs: build
+
+    if: github.event.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags/')
+
+    steps:
+      - name: Configure Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Promote testing packages to stable
+        run: |
+          pip install conan
+          conan remote add upload https://api.bintray.com/conan/grisumbras/conan
+          conan download libsass/3.6.3@grisumbras/testing -r upload
+          conan copy libsass/3.6.3@grisumbras/testing grisumbras/stable --all
+          conan user -r upload grisumbras -p "$CONAN_PASSWORD"
+          conan upload -r upload --all --confirm libsass/3.6.3@grisumbras/stable
+        env:
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
