@@ -7,16 +7,21 @@ from conans import (
 
 
 class LibSassConan(ConanFile):
-    name = 'libsass'
+    name = "libsass"
     description = "A C/C++ implementation of a Sass compiler"
     author = "Dmitry Arkhipov <grisumbras@gmail.com>"
     license = "MIT"
     homepage = "https://sass-lang.com/libsass"
     url = "https://github.com/grisumbras/conan-libsass"
+    default_user = "grisumbras"
+    default_channel = "testing"
 
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [False, True]}
     default_options = {"shared": False}
+
+    def configure(self):
+        del self.settings.compiler.cxxstd
 
     def source(self):
         url = "https://github.com/sass/libsass/archive/{version}.{ext}".format(
@@ -36,6 +41,9 @@ class LibSassConan(ConanFile):
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.install()
         self.copy("LICENSE", src=self._src_subdir,  dst="share/libsass")
+
+    def package_id(self):
+        del self.settings.compiler.libcxx
 
     @property
     def _os_ext(self):
