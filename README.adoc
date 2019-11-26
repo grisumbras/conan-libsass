@@ -1,8 +1,8 @@
 = conan-libsass _(libsass)_
+:version: 3.6.3
 
-image:https://api.bintray.com/packages/grisumbras/conan/libsass%3Agrisumbras/images/download.svg[Download,link=https://bintray.com/grisumbras/conan/libsass%3Agrisumbras/_latestVersion]
-
-image:https://github.com/grisumbras/conan-libsass/workflows/Build/badge.svg?branch=project-info[Build status,link=https://github.com/grisumbras/conan-libsass/actions]
+image:https://api.bintray.com/packages/grisumbras/conan/libsass%3Agrisumbras/images/download.svg?version={version}%3Astable[Download,link=https://bintray.com/grisumbras/conan/libsass%3Agrisumbras/{version}%3Astable/link]
+image:https://github.com/grisumbras/conan-libsass/workflows/Build/badge.svg?branch=master[Build status,link=https://github.com/grisumbras/conan-libsass/actions]
 
 ____
 https://conan.io[Conan] package for https://sass-lang.com/libsass[Libsass]
@@ -19,18 +19,18 @@ $ conan remote add grisumbras https://api.bintray.com/conan/grisumbras/conan
 
 Add it to the list of requirements inside your `conanfile.txt`:
 
-[source,ini]
+[source,ini,subs="attributes+"]
 ----
 [requires]
-libsass/[>=3.6.1]@grisumbras/stable
+libsass/{version}@grisumbras/stable
 ----
 
 or inside your `conanfile.py`:
 
-[source,py]
+[source,py,subs="attributes+"]
 ----
 class YourConan(ConanFile):
-    requires = "libsass/[>=3.6.1]@grisumbras/stable"
+    requires = "libsass/{version}@grisumbras/stable"
 ----
 
 == Maintainer
