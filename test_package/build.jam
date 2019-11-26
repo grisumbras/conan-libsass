@@ -1,0 +1,13 @@
+import testing ;
+
+
+project libsass-test ;
+
+
+alias dl : : <target-os>windows <link>shared ; # ignore on Windows
+lib dl : : <name>dl <link>shared ;
+
+exe tester : [ glob *.cpp ] /libsass//libs dl/<link>shared ;
+
+run tester : target-name test ;
+explicit test ;

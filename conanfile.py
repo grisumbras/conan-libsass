@@ -34,6 +34,8 @@ class LibSassConan(ConanFile):
     def build(self):
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self)
+            for var in ["CXXFLAGS", "CFLAGS"]:
+                autotools.vars[var] += " " + autotools.vars["CPPFLAGS"]
             autotools.make()
 
     def package(self):
@@ -46,6 +48,11 @@ class LibSassConan(ConanFile):
 
     def package_id(self):
         del self.settings.compiler.libcxx
+
+    def package_info(self):
+        self.cpp_info.libs = ["sass"]
+        if self.settings.os == "Linux":
+            self.cpp_info.system_libs = ["dl"]
 
     @property
     def _os_ext(self):
