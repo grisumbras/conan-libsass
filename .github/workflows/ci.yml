@@ -1,11 +1,11 @@
 name: ci
 
-on:
-  push:
-    branches:
-      - '*'
-    tags:
-      - '*'
+on: push
+
+env:
+  CONAN_UPLOAD: https://api.bintray.com/conan/grisumbras/conan
+  CONAN_LOGIN_USERNAME: grisumbras
+  CONAN_USERNAME: grisumbras
 
 jobs:
   build:
@@ -27,17 +27,17 @@ jobs:
       - name: Install CPT
         run: pip install conan_package_tools
 
-      - name: Enable uploads
-        if: github.event.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags/')
-        run: echo "::set-env name=CONAN_LOGIN_USERNAME::grisumbras"
+      - name: Enable uploads from master
+        if: github.event.ref == 'refs/heads/master'
+        run: echo "::set-env name=CONAN_PASSWORD::$CONAN_PASSWORD"
+        env:
+          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
 
       - name: Run CPT
         run: python build.py
         env:
           CONAN_STABLE_BRANCH_PATTERN: '---'
-          CONAN_REFERENCE: libsass/${{ matrix.version }}@grisumbras/testing
-          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
-          CONAN_UPLOAD: https://api.bintray.com/conan/grisumbras/conan
+          CONAN_REFERENCE: libsass/${{ matrix.version }}@${{ env.CONAN_USERNAME }}/testing
           CONAN_GCC_VERSIONS: '7'
           CONAN_ARCHS: x86_64
           CONAN_BUILD_TYPES: Release
@@ -45,7 +45,7 @@ jobs:
   publish:
     needs: build
 
-    if: github.event.ref == 'refs/heads/master' || startsWith(github.event.ref, 'refs/tags/')
+    if: github.event.ref == 'refs/heads/master'
 
     strategy:
       matrix:
@@ -62,11 +62,11 @@ jobs:
       - name: Promote testing packages to stable
         run: |
           pip install conan
-          conan remote add upload https://api.bintray.com/conan/grisumbras/conan
+          conan remote add upload $CONAN_UPLOAD
           conan download $CONAN_REFERENCE -r upload
-          conan copy $CONAN_REFERENCE  grisumbras/stable --all
-          conan user -r upload grisumbras -p "$CONAN_PASSWORD"
-          conan upload -r upload --all --confirm libsass/*@grisumbras/stable
+          conan copy $CONAN_REFERENCE $CONAN_USERNAME/stable --all
+          conan user -r upload $CONAN_LOGIN_USERNAME -p "$CONAN_PASSWORD"
+          conan upload -r upload --all --confirm libsass/*@$CONAN_USERNAME/stable
         env:
-          CONAN_REFERENCE: libsass/${{ matrix.version }}@grisumbras/testing
+          CONAN_REFERENCE: libsass/${{ matrix.version }}@${{ env.CONAN_USERNAME }}/testing
           CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
