@@ -40,8 +40,8 @@ class LibSassConan(ConanFile):
             with tools.environment_append({"PREFIX": self.package_folder}):
                 autotools = AutoToolsBuildEnvironment(self)
                 autotools.install()
-        self.copy("LICENSE", src=self._src_subdir,  dst="share/libsass")
-        self.copy("include/*", src=self._src_subdir)
+                autotools.make(target="install-headers")
+        self.copy("LICENSE", src=self._src_subdir, dst="share/libsass")
 
     def package_id(self):
         del self.settings.compiler.libcxx
