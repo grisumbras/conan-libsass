@@ -1,0 +1,49 @@
+= conan-libsass _(libsass)_
+
+image:https://api.bintray.com/packages/grisumbras/conan/libsass%3Agrisumbras/images/download.svg[Download,link=https://bintray.com/grisumbras/conan/libsass%3Agrisumbras/_latestVersion]
+
+image:https://github.com/grisumbras/conan-libsass/workflows/Build/badge.svg?branch=project-info[Build status,link=https://github.com/grisumbras/conan-libsass/actions]
+
+____
+https://conan.io[Conan] package for https://sass-lang.com/libsass[Libsass]
+____
+
+== Install
+
+Add the necessary conan remote:
+
+[source,shell]
+----
+$ conan remote add grisumbras https://api.bintray.com/conan/grisumbras/conan
+----
+
+Add it to the list of requirements inside your `conanfile.txt`:
+
+[source,ini]
+----
+[requires]
+libsass/[>=3.6.1]@grisumbras/stable
+----
+
+or inside your `conanfile.py`:
+
+[source,py]
+----
+class YourConan(ConanFile):
+    requires = "libsass/[>=3.6.1]@grisumbras/stable"
+----
+
+== Maintainer
+Dmitry Arkhipov <grisumbras@gmail.com>
+
+Libsass itself is maintained by other people
+https://github.com/sass/libsass[here].
+
+== Contributing
+Patches welcome!
+
+== License
+link:LICENSE[BSL-1.0] (C) 2019 Dmitry Arkhipov
+
+Libsass itself is licensed under
+https://github.com/sass/libsass/blob/master/LICENSE[a different license].
