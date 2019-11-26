@@ -19,6 +19,7 @@ class LibSassConan(ConanFile):
     settings = "arch", "os", "compiler", "build_type"
     options = {"shared": [False, True]}
     default_options = {"shared": False}
+    exports = "LICENSE"
 
     def configure(self):
         del self.settings.compiler.cxxstd
