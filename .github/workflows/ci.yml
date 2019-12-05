@@ -24,9 +24,6 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Install CPT
-        run: pip install conan_package_tools
-
       - name: Enable uploads from master
         if: github.event.ref == 'refs/heads/master'
         run: echo "::set-env name=CONAN_PASSWORD::$CONAN_PASSWORD"
@@ -34,7 +31,7 @@ jobs:
           CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
 
       - name: Run CPT
-        run: python build.py
+        uses: grisumbras/run-cpt@v0.2.0
         env:
           CONAN_STABLE_BRANCH_PATTERN: '---'
           CONAN_REFERENCE: libsass/${{ matrix.version }}@${{ env.CONAN_USERNAME }}/testing
@@ -54,19 +51,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Pull sources
+        uses: actions/checkout@v1
+
       - name: Configure Python
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
 
-      - name: Promote testing packages to stable
-        run: |
-          pip install conan
-          conan remote add upload $CONAN_UPLOAD
-          conan download $CONAN_REFERENCE -r upload
-          conan copy $CONAN_REFERENCE $CONAN_USERNAME/stable --all
-          conan user -r upload $CONAN_LOGIN_USERNAME -p "$CONAN_PASSWORD"
-          conan upload -r upload --all --confirm libsass/*@$CONAN_USERNAME/stable
+      - name: Promote to stable
+        uses: grisumbras/conan-promote@v0.3.0
+        with:
+          version: ${{ matrix.version }}
         env:
-          CONAN_REFERENCE: libsass/${{ matrix.version }}@${{ env.CONAN_USERNAME }}/testing
           CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
