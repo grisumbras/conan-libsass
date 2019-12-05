@@ -34,16 +34,14 @@ class LibSassConan(ConanFile):
     def build(self):
         with self._build_context():
             autotools = AutoToolsBuildEnvironment(self)
-            for var in ["CXXFLAGS", "CFLAGS"]:
-                autotools.vars[var] += " " + autotools.vars["CPPFLAGS"]
-            autotools.make()
+            autotools.make(vars=self._fixed_vars(autotools))
 
     def package(self):
         with self._build_context():
-            with tools.environment_append({"PREFIX": self.package_folder}):
-                autotools = AutoToolsBuildEnvironment(self)
-                autotools.install()
-                autotools.make(target="install-headers")
+            autotools = AutoToolsBuildEnvironment(self)
+            vars = self._fixed_vars(autotools)
+            autotools.install(vars=vars)
+            autotools.make(target="install-headers", vars=vars)
         self.copy("LICENSE", src=self._src_subdir, dst="share/libsass")
 
     def package_id(self):
@@ -56,18 +54,23 @@ class LibSassConan(ConanFile):
 
     @property
     def _os_ext(self):
-        return "zip" if self.settings.os == "Windows" else "tar.gz"
+        return "zip" if tools.os_info.is_windows else "tar.gz"
 
     @property
     def _src_subdir(self):
         return "libsass-{}".format(self.version)
 
+    def _fixed_vars(self, autotools):
+        vars = autotools.vars
+        for var in ["CXXFLAGS", "CFLAGS"]:
+            vars[var] += " " + vars["CPPFLAGS"]
+        return vars
+
     @contextlib.contextmanager
     def _build_context(self):
+        env = { "PREFIX": self.package_folder }
         if self.options.shared:
-            env = tools.environment_append({"BUILD": "shared"})
-        else:
-            env = tools.no_op()
-        with env:
+            env["BUILD"] = "shared"
+        with tools.environment_append(env):
             with tools.chdir(self._src_subdir):
                 yield
